@@ -66,7 +66,7 @@ E --> B --> A
 | Component | Stack / Libs |
 |-----------|--------------|
 | **Frontend** | Next.js 14 (App Router), SWR, Tailwind, TypeScript |
-| **Backend** | Go 1.22, Fiber (minimal router), go-readability, `openai-go` |
+| **Backend** | Go 1.24, Fiber (minimal router), go-readability, `openai-go` |
 | **Infra** | Fly.io, Dockerfile (multi-stage) |
 
 ### API Contract

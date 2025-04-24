@@ -7,7 +7,7 @@ These rules are injected into every Cascade / AI request inside this repo.  **St
 ## 1. Project Snapshot
 
 * **One‑liner** Turn any public article URL into a 280‑char headline‑style TL;DR in < 5 s.
-* **Stack** Go 1.22 + Fiber API • Next.js 14 App Router UI • Fly.io deploy.
+* **Stack** Go 1.24 + Fiber API • Next.js 14 App Router UI • Fly.io deploy.
 * **Monorepo Layout**  
   ```
 /cmd/api        – Go entrypoint & routes

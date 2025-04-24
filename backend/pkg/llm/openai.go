@@ -4,9 +4,15 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strings"
 
 	"github.com/sashabaranov/go-openai"
 )
+
+// Summarizer defines the interface for text summarization
+type Summarizer interface {
+	Summarize(text string) (headline string, bullets []string, err error)
+}
 
 // Client wraps the OpenAI client to provide summarization capabilities
 type Client struct {
@@ -47,12 +53,31 @@ func (c *Client) Summarize(text string) (headline string, bullets []string, err 
 	}
 
 	// Parse the response into headline and bullets
-	// TODO: Add proper parsing logic based on the actual response format
-	if len(resp.Choices) == 0 {
-		return "", nil, errors.New("no completion choices returned")
+	if len(resp.Choices) == 0 || resp.Choices[0].Message.Content == "" {
+		return "", nil, errors.New("no summary generated")
 	}
 
-	// For now, returning the raw response - this will be refined in the next iteration
-	content := resp.Choices[0].Message.Content
-	return content, []string{}, nil
+	// Parse response - format is expected to be:
+	// Headline: ...
+	// - Point 1
+	// - Point 2
+	// - Point 3
+	lines := strings.Split(resp.Choices[0].Message.Content, "\n")
+	if len(lines) < 4 {
+		return "", nil, errors.New("invalid response format")
+	}
+
+	// Extract headline (remove "Headline: " prefix if present)
+	headline = strings.TrimPrefix(lines[0], "Headline: ")
+
+	// Extract bullet points
+	bullets = make([]string, 0, 3)
+	for _, line := range lines[1:] {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "- ") {
+			bullets = append(bullets, strings.TrimPrefix(line, "- "))
+		}
+	}
+
+	return headline, bullets, nil
 }

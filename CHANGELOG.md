@@ -39,3 +39,16 @@
 - Configured temperature=0.5 as per PRD requirements
 - Added unit tests with mock HTTP client for OpenAI API calls
 - Added environment-based API key configuration
+
+### [B6] - 2025-04-24
+- Integrated URL validation, content extraction, and LLM summarization
+- Added proper error handling with HTTP status codes (422/500)
+- Implemented singleton LLM client for performance
+- Added integration tests with mocked LLM client
+- Improved response parsing for headline and bullet points
+
+### [B6.2] - 2025-04-24
+- Added validation for empty content extraction
+- Improved error handling to prevent 400 errors from OpenAI
+- Added comprehensive debug logging for content extraction
+- Fixed potential null content issues in article parsing

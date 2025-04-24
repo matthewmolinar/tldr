@@ -46,7 +46,7 @@ func TestClient_Summarize(t *testing.T) {
 		Choices: []openai.ChatCompletionChoice{
 			{
 				Message: openai.ChatCompletionMessage{
-					Content: "Test Headline",
+					Content: "Headline: Test Headline\n- Point 1\n- Point 2\n- Point 3",
 				},
 			},
 		},
@@ -71,7 +71,7 @@ func TestClient_Summarize(t *testing.T) {
 		headline, bullets, err := client.Summarize("Test article content")
 		require.NoError(t, err)
 		assert.Equal(t, "Test Headline", headline)
-		assert.Empty(t, bullets, "bullets should be empty for now")
+		assert.Equal(t, []string{"Point 1", "Point 2", "Point 3"}, bullets)
 
 		// Verify request was properly formed
 		assert.NotNil(t, mock.request)

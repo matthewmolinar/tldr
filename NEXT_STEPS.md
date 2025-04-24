@@ -10,9 +10,12 @@
 - [DONE] B4 Article Extraction module .... Tests to write: unit – golden-file approach: save a known HTML sample under testdata/article.html; run Extract and assert returned text contains expected phrase & len ≤ 8192 bytes.
 
 
-- [DOING] B5 LLM client wrapper .... Tests to write: unit – inject http.Client stub that intercepts JSON payload, lets you assert max-prompt size & returns mocked LLM JSON.
+- [DONE] B5 LLM client wrapper .... Tests to write: unit – inject http.Client stub that intercepts JSON payload, lets you assert max-prompt size & returns mocked LLM JSON.
 
 
-- [TODO] B6 Wire Extraction with LLM .... Test to write: integration – spin up Fiber app, stub LLM client (inject via interface) returning canned result, hit /api/summarize, verify pipeline.
+- [DOING] B6 Wire Extraction with LLM .... Test to write: integration – spin up Fiber app, stub LLM client (inject via interface) returning canned result, hit /api/summarize, verify pipeline.
+
+
+- [TODO] Error mapping middleware .... Test to write: unit – create artificial handler returning fiber.ErrUnprocessableEntity, ensure response body matches specification.
 
 

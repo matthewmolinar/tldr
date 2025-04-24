@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 	"github.com/matthewmolinar/tldr/pkg/llm"
@@ -40,8 +41,13 @@ func main() {
 		WriteTimeout: 5 * time.Second,
 	})
 
-	// Add logger middleware
+	// Add middleware
 	app.Use(logger.New())
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "https://web-tldr.vercel.app",
+		AllowMethods: "GET,POST,OPTIONS",
+		AllowHeaders: "Content-Type",
+	}))
 
 	// Health check endpoint
 	app.Get("/healthz", func(c *fiber.Ctx) error {

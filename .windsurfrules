@@ -50,6 +50,22 @@ When generating or editing files, always respect this structure. **Never create 
 * Minimum coverage gate 80 % on Go packages (see CI workflow).
 * Playwright specs must include `@smoke` tag for quick pipelines.
 
+1. Testing Strategy:
+   - Always test the full server startup in integration tests
+   - Add TestMain setup to verify all components can initialize
+   - Consider adding a simple server startup test: `TestServerStartup`
+
+2. Running Server:
+   - Add a clear entrypoint pattern in docs
+   - Standardize on `go run cmd/api/main.go cmd/api/handlers.go` for server startup
+   - Consider adding a Makefile target: `make run` that uses the correct pattern
+   - Document the "don't use *.go" gotcha in README
+
+3. File Organization:
+   - Keep main.go minimal, move routes to routes.go
+   - Consider handlers/package for larger APIs
+   - Document file naming conventions
+
 ---
 
 ## 5. CI / Agent Output Contract

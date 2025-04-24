@@ -19,6 +19,12 @@
 
 ### [B3] - 2025-04-24
 - Added URL validation package with strict requirements:
+
+### [B4] - 2025-04-24
+- Fixed content extraction using go-shiori/go-readability
+- Added proper error handling for article parsing
+- Implemented 8KB content size limit
+- Added integration tests with sample article
   - HTTPS scheme enforcement
   - 20KB size limit for HTML content
 - Integrated validation into summarize endpoint

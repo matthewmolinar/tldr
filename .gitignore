@@ -1,3 +1,6 @@
+# Environment
+.env
+
 # Go
 /backend/vendor/
 *.exe

@@ -10,3 +10,16 @@
 - Added core dependencies:
   - github.com/gofiber/fiber/v2
   - github.com/stretchr/testify for testing
+
+### [B2] - 2025-04-24
+- Added `/api/summarize` endpoint with dummy response
+- Implemented request logging middleware
+- Added integration tests for server startup and routes
+- Established test patterns with setupTestApp helper
+
+### [B3] - 2025-04-24
+- Added URL validation package with strict requirements:
+  - HTTPS scheme enforcement
+  - 20KB size limit for HTML content
+- Integrated validation into summarize endpoint
+- Added comprehensive table-driven tests with HTTP mocking

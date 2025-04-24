@@ -22,6 +22,8 @@
 
 
 
+
+
 ### [B4] - 2025-04-24
 - Fixed content extraction using go-shiori/go-readability
 - Added proper error handling for article parsing
@@ -52,3 +54,9 @@
 - Improved error handling to prevent 400 errors from OpenAI
 - Added comprehensive debug logging for content extraction
 - Fixed potential null content issues in article parsing
+
+
+### [B7] - 2025-04-24
+- Added error middleware to convert errors to JSON responses
+- Standardized error format across API {"error": "message"}
+- Added unit tests for error handling middleware

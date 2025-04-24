@@ -1,0 +1,104 @@
+# TL;DR‑as‑a‑Service – Windsurf Local Rules
+
+These rules are injected into every Cascade / AI request inside this repo.  **Stick to them; everything else is out of scope.**
+
+---
+
+## 1. Project Snapshot
+
+* **One‑liner** Turn any public article URL into a 280‑char headline‑style TL;DR in < 5 s.
+* **Stack** Go 1.22 + Fiber API • Next.js 14 App Router UI • Fly.io deploy.
+* **Monorepo Layout**  
+  ```
+/cmd/api        – Go entrypoint & routes
+/pkg/extract    – Readability wrapper
+/pkg/llm        – OpenAI / Anthropic adapter
+/web            – Next.js frontend  
+  ```
+
+When generating or editing files, always respect this structure. **Never create top‑level folders other than the four above, plus `/scripts`, `/docs`, or `/testdata` when needed.**
+
+---
+
+## 2. Coding Conventions
+
+### Go
+1. Use **standard library first**, then proven libs (`gofiber/fiber`, `go-readability`).  
+2. Keep files ≤ 300 LOC; extract helpers into `pkg/*` at 200 LOC.  
+3. Public functions need doc comments.  
+4. Run `goimports` & `golangci-lint run` on every save.
+
+### TypeScript / Next.js
+1. Use functional components + hooks only.  
+2. Prefer SWR / fetch over axios.  
+3. Tailwind for styling, **never** class names longer than 120 chars.  
+4. No `any` – if you can’t determine a type, create an explicit `TODO` type and open an issue.
+
+---
+
+## 3. Commit & Branch Flow
+
+* **Branch per issue** named `issue/<ticket‑id>‑<slug>` (e.g., `issue/B3-validate-url`).
+* Commit style: `<scope>: <verb> <subject>` – scopes are `api`, `ui`, `infra`, `test`, or `docs`.
+* Squash‑merge PRs; description must close the GitHub issue.
+
+---
+
+## 4. Tests & Coverage
+
+* **Unit tests** live next to code; integration tests under `/cmd/api` or `/web/tests`.
+* Minimum coverage gate 80 % on Go packages (see CI workflow).
+* Playwright specs must include `@smoke` tag for quick pipelines.
+
+---
+
+## 5. CI / Agent Output Contract
+1. Every ticket must end with a ```patch block containing a git-compatible unified diff, nothing else.
+2. Append a ```bash block that shows: go vet ./... && go test ./... && go run ./cmd/api (or npm test for web tasks).
+3. Code that fails vet, lint, or tests is auto-rejected.
+4. Server code must respect ${PORT:-8080} and set Fiber Read/WriteTimeout = 5s.
+5. Backend deps limited to: fiber/v2, go-readability, openai-go (LLM), testify (testing).
+
+
+---
+
+## 6. Secrets & Config
+
+* **Never** hard‑code API keys. Use `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `LLM_PROVIDER` envs.
+* `.env.sample` mirrors every new variable.
+* If you add a secret, document it at top of the PR description.
+
+---
+
+## 7. Non‑Goals (Out of Scope)
+
+* User auth, DB storage, metrics dashboards, rate‑limiting (except simple in‑mem).  
+* Mobile builds, desktop, or Electron.  
+* Any AI “rewrite” or chat features – summarization only.
+
+---
+
+## 8. AI Interaction Tips
+
+* Always start by restating the **specific task + path** you’re about to touch.  
+* Ask clarifying questions if requirements ambiguous **before** touching code.  
+* Update or create unit tests in the same PR as code changes.
+* If you discover a reusable pattern (e.g., optimal prompt), append it to `/docs/decisions.md`.
+
+---
+
+## 9. Autoupdate Rules
+
+If you write best practices during generation that aren’t covered here, append them under a new section `## 9. Additions` instead of editing prior sections.
+
+---
+
+## 10. Danger Zone
+
+* Do **not** modify infra (`fly.toml`, `Dockerfile`) without an associated D‑series ticket.  
+* Do **not** overwrite or delete `.windsurfrules`, `.github/workflows/ci.yml`, or `Makefile` without explicit approval from the maintainer.
+
+---
+
+_End of rules_
+

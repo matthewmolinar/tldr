@@ -3,13 +3,14 @@ package validate
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-const maxContentLengthBytes = 20 * 1024 // 20 KB
+const maxContentLengthBytes = 10 * 1024 * 1024 // 10 MB
 
 // ValidateURL checks if the given URL is valid according to service requirements:
 // - Must use HTTPS scheme
@@ -18,10 +19,19 @@ func ValidateURL(s string, client *http.Client) error {
 	if client == nil {
 		client = http.DefaultClient
 	}
-	// Parse URL
+	// Parse and normalize URL
+	log.Printf("Validating URL: %q", s)
 	u, err := url.Parse(s)
-	if err != nil || u.Host == "" {
+	if err != nil {
+		log.Printf("URL parsing error: %v", err)
 		return fiber.NewError(fiber.StatusBadRequest, "invalid URL format")
+	}
+
+	// Normalize URL
+	log.Printf("Parsed URL - Host: %q, Scheme: %q, Path: %q", u.Host, u.Scheme, u.Path)
+	u.RawQuery = ""
+	if u.Host == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "URL must include a host")
 	}
 
 	// Verify HTTPS scheme
@@ -30,24 +40,33 @@ func ValidateURL(s string, client *http.Client) error {
 	}
 
 	// Check content size via HEAD request
-	req, err := http.NewRequest(http.MethodHead, s, nil)
+	log.Printf("Making HEAD request to: %s", u.String())
+	req, err := http.NewRequest(http.MethodHead, u.String(), nil)
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "failed to create request")
+		log.Printf("Failed to create request: %v", err)
+		return fiber.NewError(fiber.StatusBadRequest, fmt.Sprintf("failed to create request: %v", err))
 	}
 
+	// Add a user agent to avoid being blocked by some sites
+	req.Header.Set("User-Agent", "Mozilla/5.0 TL;DR-App/1.0")
+	
+	log.Printf("Sending HEAD request")
 	resp, err := client.Do(req)
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, "failed to fetch URL")
+		log.Printf("Failed to fetch URL: %v", err)
+		return fiber.NewError(fiber.StatusUnprocessableEntity, fmt.Sprintf("failed to fetch URL: %v", err))
 	}
 	defer resp.Body.Close()
 
+	log.Printf("Received response status: %s", resp.Status)
+	
 	// Check content length if provided
 	contentLength := resp.ContentLength
+	log.Printf("Content length: %d bytes (max %d bytes)", contentLength, maxContentLengthBytes)
+	
 	if contentLength > maxContentLengthBytes {
-		return fiber.NewError(
-			fiber.StatusBadRequest,
-			fmt.Sprintf("content too large: %d bytes (max %d bytes)", 
-				contentLength, maxContentLengthBytes),
+		return fiber.NewError(fiber.StatusUnprocessableEntity, fmt.Sprintf("content too large: %d bytes (max %d bytes)", 
+			contentLength, maxContentLengthBytes),
 		)
 	}
 

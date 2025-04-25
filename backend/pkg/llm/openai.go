@@ -2,7 +2,10 @@ package llm
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
+	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -25,7 +28,29 @@ func NewClient() (*Client, error) {
 	if apiKey == "" {
 		return nil, errors.New("OPENAI_API_KEY environment variable is required")
 	}
-	return &Client{openai.NewClient(apiKey)}, nil
+	
+	// Check if running in production environment
+	_, inProduction := os.LookupEnv("FLY_APP_NAME")
+	
+	var client *openai.Client
+	if inProduction {
+		log.Printf("Running in production environment, disabling TLS verification for OpenAI client")
+		// Create a custom HTTP client with TLS certificate verification disabled
+		httpClient := &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		}
+		
+		client = openai.NewClientWithConfig(openai.ClientConfig{
+			AuthToken: apiKey,
+			HTTPClient: httpClient,
+		})
+	} else {
+		client = openai.NewClient(apiKey)
+	}
+	
+	return &Client{client}, nil
 }
 
 // Summarize takes an article text and returns a headline and bullet points

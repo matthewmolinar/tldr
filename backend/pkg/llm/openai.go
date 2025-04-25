@@ -43,7 +43,7 @@ func NewClient() (*Client, error) {
 		}
 		
 		client = openai.NewClientWithConfig(openai.ClientConfig{
-			AuthToken: apiKey,
+			APIKey: apiKey,
 			HTTPClient: httpClient,
 		})
 	} else {

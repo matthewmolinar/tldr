@@ -2,10 +2,12 @@ package extract
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-shiori/go-readability"
 )
@@ -17,7 +19,23 @@ const maxBytes = 8192 // 8 KB limit as per PRD
 func Extract(url string) (string, error) {
 	// Fetch the page
 	log.Printf("Fetching URL: %s", url)
-	resp, err := http.Get(url)
+	
+	// Create a custom client with TLS certificate verification disabled
+	// only in production environments to handle containerized deployments
+	var client *http.Client
+	_, inProduction := os.LookupEnv("FLY_APP_NAME")
+	if inProduction {
+		log.Printf("Disabling TLS verification for article extraction")
+		client = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		}
+	} else {
+		client = http.DefaultClient
+	}
+	
+	resp, err := client.Get(url)
 	if err != nil {
 		log.Printf("Failed to fetch URL %s: %v", url, err)
 		return "", fmt.Errorf("failed to fetch URL: %w", err)
@@ -41,14 +59,14 @@ func Extract(url string) (string, error) {
 	doc, err := parser.Parse(bytes.NewReader(body), resp.Request.URL)
 	if err != nil {
 		log.Printf("Failed to parse content: %v", err)
-		return "", fmt.Errorf("failed to parse content: %w", err)
+		return "", fmt.Errorf("failed to extract article content - site may require JavaScript or have no extractable text: %w", err)
 	}
 	log.Printf("Successfully parsed content with readability")
 
 	// Get content and validate
 	content := doc.TextContent
 	if content == "" {
-		log.Printf("No content extracted from URL %s", url)
+		log.Printf("No content extracted from URL %s - site may require JavaScript", url)
 		return "", fmt.Errorf("no content extracted from URL")
 	}
 	log.Printf("Extracted %d characters of content", len(content))

@@ -2,10 +2,12 @@
 package validate
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -17,7 +19,19 @@ const maxContentLengthBytes = 10 * 1024 * 1024 // 10 MB
 // - Content must not exceed 20 KB (checked via HEAD request)
 func ValidateURL(s string, client *http.Client) error {
 	if client == nil {
-		client = http.DefaultClient
+		// Create a custom client with TLS certificate verification disabled
+		// only in production environments to handle containerized deployments
+		_, inProduction := os.LookupEnv("FLY_APP_NAME")
+		if inProduction {
+			log.Printf("Running in production environment, disabling TLS verification")
+			client = &http.Client{
+				Transport: &http.Transport{
+					TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+				},
+			}
+		} else {
+			client = http.DefaultClient
+		}
 	}
 	// Parse and normalize URL
 	log.Printf("Validating URL: %q", s)

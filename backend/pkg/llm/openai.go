@@ -42,10 +42,11 @@ func NewClient() (*Client, error) {
 			},
 		}
 		
-		client = openai.NewClientWithConfig(openai.ClientConfig{
-			APIKey: apiKey,
-			HTTPClient: httpClient,
-		})
+		// Create client with default config
+		config := openai.DefaultConfig(apiKey)
+		// Set custom HTTP client
+		config.HTTPClient = httpClient
+		client = openai.NewClientWithConfig(config)
 	} else {
 		client = openai.NewClient(apiKey)
 	}
